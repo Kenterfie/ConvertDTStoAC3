@@ -10,6 +10,8 @@ namespace ConvertDTStoAC3
     class Program
     {
         static String strFilePath = "";
+        static String strDestFile = "";
+        static bool singleFile = false;
         static String strMKVToolNixPath = AppDomain.CurrentDomain.BaseDirectory;
         static String strFFMPEGPath = AppDomain.CurrentDomain.BaseDirectory;
         static String strSEDPath = AppDomain.CurrentDomain.BaseDirectory;
@@ -44,19 +46,24 @@ namespace ConvertDTStoAC3
                     strFilePath = args[intArgCount+1];
                     Console.WriteLine("-- Source Path: " + strFilePath.ToString());                    
                 }
+                else if (s == "-dest")
+                {
+                    strDestFile = args[intArgCount+1];
+                    Console.WriteLine("-- Dest Path: " + strDestFile.ToString());
+                }
                 else if (s == "-verbose")
                 {
                     Debug = true;
-                    Console.WriteLine("-- VERBOSE: Enabled");  
+                    Console.WriteLine("-- VERBOSE: Enabled");
                 }
                 else if (s == "-keeporiginal")
                 {
                     KeepOriginal = true;
                     Console.WriteLine("-- KEEPORIGINAL: Enabled");
                 }
-                else if (s == "-mvktoolnixpath")
+                else if (s == "-mkvtoolnixpath")
                 {
-                    strMKVToolNixPath = args[intArgCount + 1];                   
+                    strMKVToolNixPath = args[intArgCount + 1];
                 }
                 else if (s == "-ffmpegpath")
                 {
@@ -72,7 +79,7 @@ namespace ConvertDTStoAC3
             //strFilePath = args[0].ToString();
             Console.WriteLine("-- MKVToolnix Path: " + strMKVToolNixPath);
             Console.WriteLine("-- FFMpeg Path: " + strFFMPEGPath);
-            Console.WriteLine("-- Sed Path: " + strFFMPEGPath);
+            Console.WriteLine("-- Sed Path: " + strSEDPath);
 
             //Let's see if the path exists
             if (Directory.Exists(strFilePath))
@@ -84,6 +91,11 @@ namespace ConvertDTStoAC3
                 DirSearch(strFilePath);
 
                 Console.WriteLine("- Search Complete!");
+            }
+            else if (File.Exists(strFilePath))
+            {
+                singleFile = true;
+                int result = Convert(strFilePath);
             }
             else
             {
@@ -153,7 +165,22 @@ namespace ConvertDTStoAC3
 
         static int Convert(string strFileName)
         {
-            String strNewFileName = System.IO.Path.GetFileNameWithoutExtension(strFileName) + "-ac3.mkv";
+            String strNewFileName;
+
+            if (strDestFile.Length > 0 && !singleFile)
+            {
+                Console.WriteLine("--- Destination can't be used with multiple files");
+            }
+
+            if (strDestFile.Length > 0)
+            {
+                strNewFileName = strDestFile;
+            }
+            else
+            {
+                strNewFileName = System.IO.Path.GetFileNameWithoutExtension(strFileName) + "-ac3.mkv";
+            }
+             
             String strDestPath = System.IO.Path.GetDirectoryName(strFileName);
 
             Console.WriteLine("--- Converting MKV: " + strFileName);
